@@ -26,7 +26,7 @@ def minimosCuadrados(archivo):
         sumX = sumX + float(x)
         sumY = sumY + float(y)
         sumXY = sumXY + (float(x) * float(y))
-        sumX2 = sumX2 + math.pow(sumX, 2)
+        sumX2 = sumX2 + math.pow(float(x), 2)
 
     # calcular ajuste por minimos cuadrados
     #chapra 17.1.2 fig 17.6 pag 470
