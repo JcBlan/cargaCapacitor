@@ -50,10 +50,7 @@ def valoresCoeficientes(archivo):
 
 
     # calcular ajuste por minimos cuadrados
-    #chapra 17.1.2 fig 17.6 pag 470
     a1 = ( (n* sumXY) - (sumX * sumY) ) / ((n * sumX2) - math.pow(sumX, 2) )
-
-    # chapra 17.1.2 fig 17.7 pag 470
     a0 = ( sumY / n ) - ( a1 * ( sumX / n ) )
 
     return a0, a1
@@ -71,13 +68,13 @@ def graficaPreliminar(valoresX, valoresY):
 
 def valorIncognita(archivo):
     a0, a1 = valoresCoeficientes(archivo)
-    
-    tau =( -1 /  a1)
-    print("Incognita (tau): ", tau)
-    print("Error cometido: ", (12000*0.00022) - tau)
-
-
-   
+    tauCalculado =( -1 /  a1)
+    tauVerdadero = 12000*0.00022
+    print("Valor del parametro incognita y calculo del error:\n" )
+    print("Tau calculado: ", tauCalculado ,"s")
+    print("Tau verdadero: ", tauVerdadero, "s")
+    print("Error cometido:", tauVerdadero - tauCalculado)
+    print("Error porcentual:", ((tauVerdadero - tauCalculado) / tauVerdadero) * 100)
     
 #        
 #EJERCICIO 3
@@ -87,7 +84,7 @@ def funcionExponencial(a0, a1, x):
     return ( math.exp(a0) * (1- math.exp(a1* x)))
 
 def graficaSuperpuesta(valoresX, valoresY):    
-    
+    #almacenar lo que retorna la funcion valoresCoeficientes en la variable a0(el valor de a0) y en la variable a1 el valor de a1
     a0, a1 = valoresCoeficientes("datos.json")
 
     imagenesFuncion = []
@@ -109,17 +106,34 @@ def graficaSuperpuesta(valoresX, valoresY):
 
 
 #EJERCICIO 4
-def interpolacionLineal():
+def interpolacionLineal(valoresX, valoresY):
+    tau = 2.64
     R = 12000
     C = 0.00022
     x = R * C
-    # Datos obtenidos de los experimentos
-    xCero = 2.6262626e+00
-    xUno = 2.7272727e+00
-    fXcero = 6.1825397e+00
-    fXUno = 6.4982541e+00
-    fX = fXcero + ((fXUno - fXcero) / (xUno - xCero)) * (x - xCero)
-    print("Valor del parametro incognita\n\ttau: " + str(fX))
+    xUno = 0.0
+    xCero = 0.0
+    fXcero = 0.0
+    fXuno = 0.0
+    posicion = 0
+       
+    for i in range(len(valoresX)):
+        #Con este if estoy guardando en la variable xCero el valor anterior mas proximo al tau,
+        # y en la variable xUno el valor siguiente mas proximo a tau y guardo la posicion del xCero
+        if valoresX[i] < tau:
+            xCero = valoresX[i]
+            posicion = i
+            xUno = valoresX[i+1]
+               
+    for y in range(len(valoresY)) :
+        # Con este if comparo cuando la posicion de y es = a la posicion de xCero, 
+        # entonces guardo el valor de esa posicion(seria mi fXcero) y el alor del siguiente (fXuno)
+        if posicion == y:
+            fXcero = valoresY[y]
+            fXuno = valoresY[y+1]
+    #formula de interpolacion lineal de Newton        
+    fX = fXcero + (((fXuno - fXcero) / (xUno - xCero)) * (x - xCero))
+    print("Valor del parametro incognita\n\ttau: ",fX)
 
 
 
@@ -127,18 +141,9 @@ def interpolacionLineal():
 
 #EJERCICIO 5
 def ajusteSinCuadradoMin(valoresX, valoresY):
-    #plt.plot(valoresX, valoresY, ".")
-    #lag_pol = lagrange(valoresX, valoresY)
-    #print(lag_pol)
-
     p = np.polynomial.Chebyshev.fit(valoresX, valoresY, 90)
-    print(type(p))    
-    #x = np.linspace(valoresX[0], valoresX[11])
     plt.plot(valoresX, valoresY, 'r.', label="Datos Experimentales")
     t = np.linspace(0, 10, 10)
-    #plt.xlabel("T")
-    #plt.ylabel("V")
-    #plt.plot(x, lag_pol(x),  "-")
     plt.plot(t, p(t), '-', lw=2, label="Curva adaptada")
     plt.title("Ejercicio 5") 
     plt.xlabel("Tiempo")
@@ -172,13 +177,13 @@ if __name__ == "__main__":
     valorIncognita("datos.json")
 
     #EJERCICIO 3
-    print(f"\n\n{Fore.RED}Ejercicio 3:{Style.RESET_ALL} \nGrafica De Los Datos Experimentales y de los valores Obtenidos por la ecuacion linealizada")
+    print(f"\n\n{Fore.RED}Ejercicio 3:{Style.RESET_ALL} \nGrafica superpuesta De Los Datos Experimentales y de los valores Obtenidos por la ecuacion linealizada")
     graficaSuperpuesta( valoresX, valoresY)
 
     #EJERCICIO 4
-    print(f"\n\n{Fore.RED}Ejercicio 4:{Style.RESET_ALL}\nInterpolacion lineal de Newton")
-    interpolacionLineal()
+    print(f"\n\n{Fore.RED}Ejercicio 4:{Style.RESET_ALL}\nInterpolacion lineal de Newton:")
+    interpolacionLineal(valoresX, valoresY)
 
     #EJERCICIO 5
     print(f"\n\n{Fore.RED}Ejercicio 5:{Style.RESET_ALL} \nAjuste de curva con Chebyshev")
-    ajusteSinCuadradoMin(valoresX, valoresY)
+ajusteSinCuadradoMin(valoresX, valoresY)
